@@ -42,18 +42,20 @@
             font-family: 'Gowun Dodum', sans-serif; 
         }
 
-        /* [NEW] 추가된 링크 스타일 */
+        /* [NEW] 추가된 링크 영역 스타일 */
         .header-links {
             margin-top: 10px;
             display: flex;
             flex-direction: column;
             gap: 5px;
-            font-size: 0.8em;
+            font-size: 0.85em; /* 폰트 크기 조정 */
             width: 100%;
             align-items: center;
             padding-top: 8px;
             border-top: 1px dashed #ddd;
         }
+        
+        /* 유튜브 링크 스타일 */
         .header-links a {
             text-decoration: none;
             color: #555;
@@ -61,11 +63,21 @@
             align-items: center;
             gap: 6px;
             transition: 0.2s;
-            white-space: nowrap; /* 줄바꿈 방지 */
+            white-space: nowrap; 
         }
         .header-links a:hover {
             color: var(--accent);
             font-weight: bold;
+        }
+
+        /* 이메일 텍스트 스타일 (클릭 안됨) */
+        .header-email {
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: default; /* 마우스 커서 기본값 */
+            white-space: nowrap;
         }
         
         /* 메인 타이틀 */
@@ -212,9 +224,9 @@
                 <a href="https://www.youtube.com/@DDBteacher" target="_blank" title="유튜브 바로가기">
                     <span style="color:#FF0000; font-size:1.1em;">▶</span> YouTube
                 </a>
-                <a href="mailto:ddbteacher@naver.com" title="이메일 보내기">
-                    <span style="font-size:1.1em;">✉</span> Email
-                </a>
+                <div class="header-email">
+                    <span style="font-size:1.1em;">✉</span> ddbteacher@naver.com
+                </div>
             </div>
         </div>
         
