@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>적자생존 - Write to Live</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; --danger: #e74c3c; --border: #dfe6e9; }
+        
+        /* 1. 기본 폰트: 이전 버전의 깔끔한 고딕체로 복구 */
+        body { 
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+            background: var(--bg); margin: 0; padding: 20px; color: #333; 
+        }
+        
+        /* 버튼 및 입력창도 기본 고딕체 사용 */
+        button, input, select, textarea { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
+
+        /* === 헤더 디자인 === */
+        header { 
+            display: grid; 
+            grid-template-columns: 180px 1fr; 
+            border: 2px solid #333; 
+            background: white; 
+            margin-bottom: 20px;
+        }
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border-right: 2px solid #333;
+        }
+        .header-left img { width: 80px; height: auto; margin-bottom: 5px; }
+        
+        /* 2. DDBTeacher: 부드러운 폰트 적용 */
+        .header-left span { 
+            font-weight: bold; 
+            color: black; 
+            font-size: 1.1em; 
+            text-decoration: none;
+            font-family: 'Gowun Dodum', sans-serif; /* 폰트 적용 */
+        }
+        
+        /* 3. 메인 타이틀: 부드러운 폰트 적용 */
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em; 
+            font-family: 'Gowun Dodum', sans-serif; /* 폰트 적용 */
+            font-weight: normal;
+        }
+
+        /* 유틸리티 & 레이아웃 */
+        .container { max-width: 1100px; margin: 0 auto; }
+        .flex { display: flex; gap: 10px; align-items: center; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .hidden { display: none !important; }
+        .mt-10 { margin-top: 10px; }
+        .mt-20 { margin-top: 20px; }
+        
+        /* 버튼 스타일 */
+        button { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; white-space: nowrap; }
+        .btn-blue { background: var(--accent); color: white; }
+        .btn-blue:hover { background: #2980b9; }
+        .btn-gray { background: #95a5a6; color: white; }
+        .btn-red { background: var(--danger); color: white; }
+        
+        /* 상단 기능 버튼 그룹 */
+        .top-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; }
+
+        /* 보안 안내 박스 */
+        .security-notice { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; font-size: 0.9em; line-height: 1.6; margin-bottom: 20px; }
+
+        /* 탭 네비게이션 */
+        .nav-tabs { display: flex; border-bottom: 2px solid #aaa; margin-bottom: 20px; }
+        .nav-item { padding: 10px 20px; cursor: pointer; font-weight: bold; color: #777; background: #eee; margin-right: 5px; border-radius: 5px 5px 0 0; }
+        .nav-item.active { background: var(--accent); color: white; }
+
+        /* 입력 폼 */
+        .input-area { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input, select, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        
+        /* 상담 기록 카드 (한 줄 정렬 유지) */
+        .record-card { 
+            background: white; 
+            border: 1px solid #ddd; 
+            border-left: 5px solid var(--accent); 
+            padding: 10px 20px; 
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .record-card.finished { border-left-color: #95a5a6; background: #f2f2f2; opacity: 0.8; }
+        
+        .card-header {
+            display: flex;
+            align-items: center; 
+            gap: 20px;           
+            width: 100%;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap; 
+            overflow-x: auto;    
+        }
+
+        .info-text { font-size: 1.05em; color: #333; }
+        .info-label { color: #666; margin-right: 5px; display: flex; align-items: center; cursor: pointer;}
+        .record-content { white-space: pre-wrap; line-height: 1.5; color: #2c3e50; font-size: 1.05em; padding-left: 5px; }
+
+        /* 초기화면(암호) */
+        #overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.98); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .password-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border: 1px solid #ddd; width: 300px; }
+        
+        /* 인쇄(PDF) 설정 */
+        @media print {
+            body { background: white; padding: 0; }
+            #overlay, .top-actions, .security-notice, .nav-tabs, .input-area, .no-print { display: none !important; }
+            header { margin-bottom: 10px; border: 1px solid #000; } 
+            
+            body.print-selected-only .record-card:not(.print-target) { display: none !important; }
+            
+            .record-card { break-inside: avoid; border: 1px solid #333; margin-bottom: 15px; box-shadow: none; page-break-inside: avoid; }
+            .card-header { border-bottom: 1px solid #888; }
+            input[type="checkbox"] { display: none; } 
+            .info-label { margin-right: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="overlay">
+    <div class="password-box">
+        <h2 id="pwTitle" style="color:var(--primary); margin-top:0;">🔒 적자생존 Log-in</h2>
+        <p id="pwDesc" style="margin-bottom:20px; color:#666; font-size:0.9em;">비밀번호 4자리를 입력하세요.</p>
+        <input type="password" id="pwInput" maxlength="4" style="width: 100%; text-align: center; font-size: 1.5em; letter-spacing: 5px; margin-bottom:20px;" placeholder="****">
+        <div class="flex-between">
+            <button class="btn-blue" onclick="checkPw()" style="flex:1;">확인</button>
+            <button class="btn-gray" onclick="initResetProcess()" style="flex:0.5; margin-left:5px; font-size:0.8em;">초기화</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="top-actions">
+        <button class="btn-gray" onclick="switchTab('students')">학생 목록</button>
+        <button class="btn-gray" onclick="switchTab('issues')">상담 종류 목록</button>
+        <span style="border-right: 1px solid #ccc; margin: 0 5px;"></span>
+        <button class="btn-gray" onclick="exportJSON()">내보내기</button>
+        <input type="file" id="fileInput" class="hidden" onchange="importJSON(event)">
+        <button class="btn-gray" onclick="document.getElementById('fileInput').click()">불러오기</button>
+        <button class="btn-blue" onclick="printPDF()">PDF</button>
+        <button class="btn-red" onclick="initResetProcess()">초기화</button>
+    </div>
+
+    <header>
+        <div class="header-left">
+            <img src="dodo.png" alt="도도" onerror="this.style.display='none';">
+            <span>DDBTeacher</span>
+        </div>
+        <div class="header-title">- Write to Live - 적자생존 -</div>
+    </header>
+
+    <div class="security-notice">
+        🔒 <b>보안 안내:</b> 모든 데이터는 서버로 전송되지 않고 현재 사용 중인 기기에만 저장됩니다. 타인은 물론 개발자도 내용을 볼 수 없습니다.<br>
+        🔒 캐시에 저장되는 형태이므로 캐시가 삭제될 경우 상담 기록이 모두 사라집니다.<br>
+        🔒 백업이 필요한 경우 내보내기/불러오기 기능을 활용해주세요.<br>
+        🔒 불러오기는 [기존내용에 통합하기]와 [삭제하고 덮어쓰기]를 지원합니다.<br>
+        📄 <b>PDF저장:</b> 모든 내용 저장(개별 선택 없이): [PDF 저장] / 개별 저장: [개별 선택] - [PDF저장]
+    </div>
+
+    <div class="nav-tabs">
+        <div class="nav-item active" onclick="switchTab('main')">메인 화면</div>
+        <div class="nav-item" id="tab-student-btn" onclick="switchTab('students')" style="display:none;">학생 목록</div>
+        <div class="nav-item" id="tab-issue-btn" onclick="switchTab('issues')" style="display:none;">상담 종류</div>
+    </div>
+
+    <div id="tab-main">
+        <div class="input-area">
+            <div class="flex-between" style="gap:10px; margin-bottom:10px;">
+                <input type="date" id="inputDate" style="flex:0.8;">
+                <select id="inputStudent" style="flex:1;"><option value="">학생 이름</option></select>
+                <select id="inputIssue" style="flex:1;"><option value="">상담 종류</option></select>
+            </div>
+            <textarea id="inputContent" rows="3" placeholder="여기에 상담 내용을 기록하세요..."></textarea>
+            <button class="btn-blue mt-10" onclick="addRecord()" style="width:100%;">저장하기</button>
+        </div>
+
+        <div class="flex" style="background:#eee; padding:10px; border-radius:5px; margin-bottom:20px;">
+            <b style="min-width: 70px;">🔍 모아보기</b>
+            <select id="filterStudent" style="flex:1;"><option value="">학생 이름</option></select>
+            <select id="filterIssue" style="flex:1;"><option value="">상담 종류</option></select>
+            <button class="btn-blue" onclick="renderRecords()">적용</button>
+        </div>
+            
+        <div id="recordList"></div>
+    </div>
+
+    <div id="tab-students" class="hidden">
+        <div class="flex-between mb-10">
+            <h3>👥 학생 목록 설정 (1번~30번)</h3>
+            <button class="btn-gray" onclick="switchTab('main')">메인으로 돌아가기</button>
+        </div>
+        <div class="grid-inputs" id="studentInputs"></div>
+        <button class="btn-blue mt-20" onclick="saveSettings()">저장</button>
+    </div>
+
+    <div id="tab-issues" class="hidden">
+        <div class="flex-between mb-10">
+            <h3>📂 상담 종류 설정 (1번~10번)</h3>
+            <button class="btn-gray" onclick="switchTab('main')">메인으로 돌아가기</button>
+        </div>
+        <div class="grid-inputs" id="issueInputs"></div>
+        <button class="btn-blue mt-20" onclick="saveSettings()">저장</button>
+    </div>
+</div>
+
+<script>
+    // === 데이터 구조 ===
+    let db = {
+        pw: null,
+        students: new Array(30).fill(""),
+        issues: new Array(10).fill(""),
+        records: []
+    };
+
+    // === 초기화 ===
+    window.onload = function() {
+        const loaded = localStorage.getItem('counseling_db_pro');
+        if (loaded) {
+            db = JSON.parse(loaded);
+            if (db.students.length < 30) db.students = [...db.students, ...new Array(30 - db.students.length).fill("")];
+            if (db.issues.length < 10) db.issues = [...db.issues, ...new Array(10 - db.issues.length).fill("")];
+        }
+
+        if (!db.pw) {
+            document.getElementById('pwTitle').innerText = "비밀번호 생성";
+            document.getElementById('pwDesc').innerText = "나만 아는 쉬운 번호 4자리를 설정하세요.";
+        }
+        
+        document.getElementById('inputDate').valueAsDate = new Date();
+    };
+
+    // === 비밀번호 로직 ===
+    function checkPw() {
+        const input = document.getElementById('pwInput').value;
+        if (input.length !== 4) return alert("4자리를 입력해주세요.");
+
+        if (!db.pw) {
+            if (confirm(`비밀번호를 '${input}'(으)로 설정하시겠습니까?`)) {
+                db.pw = input;
+                saveDB();
+                alert("설정 완료되었습니다.");
+                dismissOverlay();
+            }
+        } else {
+            if (input === db.pw) {
+                dismissOverlay();
+            } else {
+                alert("비밀번호가 일치하지 않습니다.");
+                document.getElementById('pwInput').value = "";
+            }
+        }
+    }
+
+    function dismissOverlay() {
+        document.getElementById('overlay').classList.add('hidden');
+        renderInputs(); 
+        refreshSelectOptions();
+        renderRecords();
+    }
+
+    function initResetProcess() {
+        if (!confirm("정말 초기화하시겠습니까?")) return;
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        const input = prompt(`[초기화 확인]\n아래 숫자를 똑같이 입력하세요.\n\n${rand}`);
+        
+        if (input == rand) {
+            localStorage.removeItem('counseling_db_pro');
+            alert("초기화되었습니다. 새로고침합니다.");
+            location.reload();
+        } else {
+            alert("숫자가 일치하지 않습니다.");
+        }
+    }
+
+    // === 탭 관리 ===
+    function switchTab(tabName) {
+        document.getElementById('tab-main').classList.add('hidden');
+        document.getElementById('tab-students').classList.add('hidden');
+        document.getElementById('tab-issues').classList.add('hidden');
+        
+        document.getElementById('tab-' + tabName).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        if(tabName === 'main') document.querySelector('.nav-item').classList.add('active');
+    }
+
+    // === 설정 및 저장 ===
+    function renderInputs() {
+        document.getElementById('studentInputs').innerHTML = db.students.map((val, i) => `
+            <div><small>번호 ${i+1}</small><input type="text" id="std_${i}" value="${val}" placeholder="학생 이름"></div>
+        `).join('');
+
+        document.getElementById('issueInputs').innerHTML = db.issues.map((val, i) => `
+            <div><small>순번 ${i+1}</small><input type="text" id="iss_${i}" value="${val}" placeholder="상담 종류"></div>
+        `).join('');
+    }
+
+    function saveSettings() {
+        const oldIssues = [...db.issues];
+        for(let i=0; i<30; i++) db.students[i] = document.getElementById(`std_${i}`).value.trim();
+        for(let i=0; i<10; i++) db.issues[i] = document.getElementById(`iss_${i}`).value.trim();
+
+        // 이슈 이름 변경/삭제 대응
+        oldIssues.forEach((oldVal, idx) => {
+            const newVal = db.issues[idx];
+            if (oldVal !== "" && newVal === "") {
+                db.records.forEach(r => { if (r.issue === oldVal) r.issue = "기타"; });
+            } else if (oldVal !== "" && newVal !== "" && oldVal !== newVal) {
+                db.records.forEach(r => { if (r.issue === oldVal) r.issue = newVal; });
+            }
+        });
+
+        saveDB();
+        refreshSelectOptions();
+        renderRecords();
+        alert("저장되었습니다.");
+        switchTab('main');
+    }
+
+    // [수정사항] '▽' 텍스트 제거 
+    function refreshSelectOptions() {
+        const makeOpt = (arr, type) => {
+            let html = `<option value="">${type}</option>`; // ▽ 제거함
+            arr.forEach(val => { if(val) html += `<option value="${val}">${val}</option>`; });
+            html += `<option value="기타">기타</option>`;
+            return html;
+        };
+        const sOpt = makeOpt(db.students, "학생 이름");
+        const iOpt = makeOpt(db.issues, "상담 종류");
+
+        document.getElementById('inputStudent').innerHTML = sOpt;
+        document.getElementById('filterStudent').innerHTML = sOpt;
+        document.getElementById('inputIssue').innerHTML = iOpt;
+        document.getElementById('filterIssue').innerHTML = iOpt;
+    }
+
+    // === 기록 CRUD ===
+    function addRecord() {
+        const date = document.getElementById('inputDate').value;
+        const student = document.getElementById('inputStudent').value;
+        const issue = document.getElementById('inputIssue').value;
+        const content = document.getElementById('inputContent').value;
+
+        if(!date || !content) return alert("날짜와 내용은 필수입니다.");
+
+        db.records.push({
+            id: Date.now(),
+            date,
+            student: student || "기타",
+            issue: issue || "기타",
+            content,
+            finished: false,
+            pdfChecked: false
+        });
+        
+        document.getElementById('inputContent').value = "";
+        saveDB();
+        renderRecords();
+    }
+
+    function renderRecords() {
+        const fStu = document.getElementById('filterStudent').value;
+        const fIss = document.getElementById('filterIssue').value;
+        const list = document.getElementById('recordList');
+
+        let filtered = db.records.filter(r => (!fStu || r.student === fStu) && (!fIss || r.issue === fIss));
+        filtered.sort((a, b) => (a.finished - b.finished) || (new Date(b.date) - new Date(a.date)));
+
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+
+        list.innerHTML = filtered.map(r => {
+            const d = new Date(r.date);
+            const dateStr = `${r.date} (${days[d.getDay()]})`;
+
+            return `
+            <div class="record-card ${r.finished ? 'finished' : ''} ${r.pdfChecked ? 'print-target' : ''}">
+                <div class="card-header">
+                    <span class="info-text" style="font-weight:bold;">📅 ${dateStr}</span>
+                    <span class="info-text">👤 <b>${r.student}</b></span>
+                    <span class="info-text" style="margin-right:20px;">📂 ${r.issue}</span>
+                    
+                    <label class="info-label no-print">
+                        PDF 포함 <input type="checkbox" style="margin-left:5px;" onchange="togglePdfCheck(${r.id})" ${r.pdfChecked ? 'checked' : ''}>
+                    </label>
+
+                    <label class="info-label no-print">
+                        종료 <input type="checkbox" style="margin-left:5px;" onchange="toggleFinish(${r.id})" ${r.finished ? 'checked' : ''}>
+                    </label>
+                    
+                    <button class="btn-red no-print" onclick="deleteRecord(${r.id})" style="padding:4px 10px; font-size:0.85em;">삭제</button>
+                </div>
+                <div class="record-content">${r.content}</div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    function toggleFinish(id) {
+        const r = db.records.find(item => item.id === id);
+        if(r) { r.finished = !r.finished; saveDB(); renderRecords(); }
+    }
+
+    function togglePdfCheck(id) {
+        const r = db.records.find(item => item.id === id);
+        if(r) { r.pdfChecked = !r.pdfChecked; saveDB(); renderRecords(); }
+    }
+
+    function deleteRecord(id) {
+        if(confirm("정말 삭제하시겠습니까? (복구 불가)")) {
+            db.records = db.records.filter(r => r.id !== id);
+            saveDB();
+            renderRecords();
+        }
+    }
+
+    function saveDB() {
+        localStorage.setItem('counseling_db_pro', JSON.stringify(db));
+    }
+
+    // === 백업/복원/PDF ===
+    function exportJSON() {
+        const blob = new Blob([JSON.stringify(db, null, 2)], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `상담백업_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+    }
+
+    function importJSON(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const loaded = JSON.parse(e.target.result);
+                const choice = confirm("확인: [기존내용에 통합하기]\n취소: [삭제하고 덮어쓰기]");
+                
+                if(choice) { 
+                    loaded.students.forEach(s => {
+                        if(s && !db.students.includes(s)) {
+                            const empty = db.students.indexOf("");
+                            if(empty !== -1) db.students[empty] = s;
+                        }
+                    });
+                    loaded.issues.forEach(i => {
+                        if(i && !db.issues.includes(i)) {
+                            const empty = db.issues.indexOf("");
+                            if(empty !== -1) db.issues[empty] = i;
+                        }
+                    });
+                    const ids = new Set(db.records.map(r => r.id));
+                    const newRecs = loaded.records.filter(r => !ids.has(r.id));
+                    db.records = [...db.records, ...newRecs];
+                    alert("통합 완료되었습니다.");
+                } else { 
+                    if(confirm("기존 데이터가 모두 삭제됩니다. 계속할까요?")) {
+                        db = loaded;
+                        alert("복원되었습니다.");
+                    } else return;
+                }
+                saveDB();
+                location.reload();
+            } catch(err) { alert("파일 오류입니다."); }
+        };
+        reader.readAsText(file);
+    }
+
+    function printPDF() {
+        const hasChecked = db.records.some(r => r.pdfChecked);
+        if (hasChecked) {
+            document.body.classList.add('print-selected-only'); 
+        } else {
+            document.body.classList.remove('print-selected-only'); 
+        }
+        window.print();
+        document.body.classList.remove('print-selected-only');
+    }
+</script>
+
+</body>
+</html>
