@@ -6,15 +6,14 @@
     <title>적자생존 - Write to Live</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; --danger: #e74c3c; --border: #dfe6e9; }
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; --danger: #e74c3c; --border: #dfe6e9; --success: #2ecc71; }
         
-        /* 1. 기본 폰트: 이전 버전의 깔끔한 고딕체로 복구 */
+        /* 기본 폰트: 깔끔한 고딕체 유지 */
         body { 
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
             background: var(--bg); margin: 0; padding: 20px; color: #333; 
         }
         
-        /* 버튼 및 입력창도 기본 고딕체 사용 */
         button, input, select, textarea { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
 
         /* === 헤더 디자인 === */
@@ -35,24 +34,27 @@
         }
         .header-left img { width: 80px; height: auto; margin-bottom: 5px; }
         
-        /* 2. DDBTeacher: 부드러운 폰트 적용 */
+        /* DDBTeacher: 부드러운 폰트 적용 */
         .header-left span { 
             font-weight: bold; 
             color: black; 
             font-size: 1.1em; 
             text-decoration: none;
-            font-family: 'Gowun Dodum', sans-serif; /* 폰트 적용 */
+            font-family: 'Gowun Dodum', sans-serif; 
         }
         
-        /* 3. 메인 타이틀: 부드러운 폰트 적용 */
+        /* 메인 타이틀: 부드러운 폰트 적용 */
         .header-title {
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.5em; 
-            font-family: 'Gowun Dodum', sans-serif; /* 폰트 적용 */
+            font-family: 'Gowun Dodum', sans-serif; 
             font-weight: normal;
+            flex-direction: column;
         }
+        /* PDF 출력 시 상담 건수 표시용 */
+        .print-count-area { display: none; font-size: 0.6em; color: red; font-weight: bold; margin-top: 5px; width: 100%; text-align: left; padding-left: 20px;}
 
         /* 유틸리티 & 레이아웃 */
         .container { max-width: 1100px; margin: 0 auto; }
@@ -61,6 +63,7 @@
         .hidden { display: none !important; }
         .mt-10 { margin-top: 10px; }
         .mt-20 { margin-top: 20px; }
+        .w-full { width: 100%; box-sizing: border-box; }
         
         /* 버튼 스타일 */
         button { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; white-space: nowrap; }
@@ -68,9 +71,29 @@
         .btn-blue:hover { background: #2980b9; }
         .btn-gray { background: #95a5a6; color: white; }
         .btn-red { background: var(--danger); color: white; }
+        .btn-green { background: var(--success); color: white; }
+
+        /* 후속 상담 버튼 스타일 (NEW) */
+        .btn-followup {
+            background: white;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 15px; /* 둥근 모양 */
+            padding: 2px 10px;
+            font-size: 0.85em;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+            margin-left: 10px;
+        }
+        .btn-followup:hover {
+            background: var(--accent);
+            color: white;
+        }
         
         /* 상단 기능 버튼 그룹 */
-        .top-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; }
+        .top-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 
         /* 보안 안내 박스 */
         .security-notice { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; font-size: 0.9em; line-height: 1.6; margin-bottom: 20px; }
@@ -82,25 +105,37 @@
 
         /* 입력 폼 */
         .input-area { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        input, select, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
-        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        input, select, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
-        /* 상담 기록 카드 (한 줄 정렬 유지) */
+        /* 입력 레이아웃 최적화 (한 줄 정렬 NEW) */
+        .input-compact-row { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 10px; 
+            align-items: center; 
+            flex-wrap: nowrap; /* 줄바꿈 방지 */
+        }
+        .input-compact-row input[type="date"] { width: 135px; flex-shrink: 0; }
+        .input-compact-row select { flex: 1; min-width: 0; } /* 공간 균등 분배 */
+        .time-group { display: flex; gap: 5px; flex: 1.2; align-items: center; }
+        .time-group select { flex: 1; }
+        
+        /* 상담 기록 카드 */
         .record-card { 
             background: white; 
             border: 1px solid #ddd; 
             border-left: 5px solid var(--accent); 
             padding: 10px 20px; 
-            margin-bottom: 10px; 
+            margin-bottom: 15px; 
             border-radius: 8px; 
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .record-card.finished { border-left-color: #95a5a6; background: #f2f2f2; opacity: 0.8; }
+        .record-card.finished { border-left-color: #95a5a6; background: #f2f2f2; opacity: 0.9; }
         
         .card-header {
             display: flex;
             align-items: center; 
-            gap: 20px;           
+            gap: 15px;           
             width: 100%;
             padding-bottom: 8px;
             margin-bottom: 8px;
@@ -109,10 +144,20 @@
             overflow-x: auto;    
         }
 
-        .info-text { font-size: 1.05em; color: #333; }
-        .info-label { color: #666; margin-right: 5px; display: flex; align-items: center; cursor: pointer;}
-        .record-content { white-space: pre-wrap; line-height: 1.5; color: #2c3e50; font-size: 1.05em; padding-left: 5px; }
+        .info-text { font-size: 1.0em; color: #333; display: flex; align-items: center; gap: 4px;}
+        .info-label { color: #555; margin-right: 5px; display: flex; align-items: center; cursor: pointer; font-size: 0.95em;}
+        .record-title { font-weight: bold; font-size: 1.1em; color: var(--primary); margin-bottom: 5px; display: block; border-bottom: 1px dashed #eee; padding-bottom: 5px;}
+        .record-content { white-space: pre-wrap; line-height: 1.5; color: #2c3e50; font-size: 1.05em; padding-left: 2px; }
 
+        /* 후속 상담 영역 */
+        .followup-container { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; }
+        .followup-item { background: #f1f8ff; padding: 10px; border-radius: 6px; margin-bottom: 5px; font-size: 0.95em; border-left: 3px solid var(--accent); }
+        .followup-date { font-size: 0.8em; color: #777; margin-bottom: 4px; font-weight: bold;}
+        .followup-form { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; background: #eee; padding: 10px; border-radius: 5px;}
+
+        /* 설정창 그리드 */
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        
         /* 초기화면(암호) */
         #overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.98); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .password-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border: 1px solid #ddd; width: 300px; }
@@ -122,13 +167,16 @@
             body { background: white; padding: 0; }
             #overlay, .top-actions, .security-notice, .nav-tabs, .input-area, .no-print { display: none !important; }
             header { margin-bottom: 10px; border: 1px solid #000; } 
+            .print-count-area { display: block; border-bottom: 2px solid red; margin-bottom: 10px;}
             
             body.print-selected-only .record-card:not(.print-target) { display: none !important; }
             
-            .record-card { break-inside: avoid; border: 1px solid #333; margin-bottom: 15px; box-shadow: none; page-break-inside: avoid; }
-            .card-header { border-bottom: 1px solid #888; }
+            .record-card { break-inside: avoid; border: 1px solid #555; margin-bottom: 15px; box-shadow: none; page-break-inside: avoid; }
+            .card-header { border-bottom: 1px solid #888; flex-wrap: wrap; white-space: normal; }
             input[type="checkbox"] { display: none; } 
             .info-label { margin-right: 10px; }
+            /* 인쇄 시 후속 상담 입력창은 숨김 */
+            .followup-form { display: none !important; }
         }
     </style>
 </head>
@@ -150,6 +198,7 @@
     <div class="top-actions">
         <button class="btn-gray" onclick="switchTab('students')">학생 목록</button>
         <button class="btn-gray" onclick="switchTab('issues')">상담 종류 목록</button>
+        <button class="btn-gray" onclick="switchTab('locations')">장소 관리</button>
         <span style="border-right: 1px solid #ccc; margin: 0 5px;"></span>
         <button class="btn-gray" onclick="exportJSON()">내보내기</button>
         <input type="file" id="fileInput" class="hidden" onchange="importJSON(event)">
@@ -163,7 +212,10 @@
             <img src="dodo.png" alt="도도" onerror="this.style.display='none';">
             <span>DDBTeacher</span>
         </div>
-        <div class="header-title">- Write to Live - 적자생존 -</div>
+        <div class="header-title">
+            <div>- Write to Live - 적자생존 -</div>
+            <div id="printCountArea" class="print-count-area">총 상담 건수: 0회</div>
+        </div>
     </header>
 
     <div class="security-notice">
@@ -178,17 +230,41 @@
         <div class="nav-item active" onclick="switchTab('main')">메인 화면</div>
         <div class="nav-item" id="tab-student-btn" onclick="switchTab('students')" style="display:none;">학생 목록</div>
         <div class="nav-item" id="tab-issue-btn" onclick="switchTab('issues')" style="display:none;">상담 종류</div>
+        <div class="nav-item" id="tab-loc-btn" onclick="switchTab('locations')" style="display:none;">장소 관리</div>
     </div>
 
     <div id="tab-main">
         <div class="input-area">
-            <div class="flex-between" style="gap:10px; margin-bottom:10px;">
-                <input type="date" id="inputDate" style="flex:0.8;">
-                <select id="inputStudent" style="flex:1;"><option value="">학생 이름</option></select>
-                <select id="inputIssue" style="flex:1;"><option value="">상담 종류</option></select>
+            <div class="input-compact-row">
+                <input type="date" id="inputDate" title="상담 일자">
+                <select id="inputStudent" title="학생 이름"><option value="">학생 이름</option></select>
+                <select id="inputIssue" title="상담 종류"><option value="">상담 종류</option></select>
+                <select id="inputLocation" title="상담 장소"><option value="교실">🏠 교실</option></select>
+                
+                <div class="time-group">
+                    <select id="inputTimeHour">
+                        <option value="0">0시간</option>
+                        <option value="1">1시간</option>
+                        <option value="2">2시간</option>
+                        <option value="3">3시간</option>
+                    </select>
+                    <select id="inputTimeMin">
+                        <option value="0">0분</option>
+                        <option value="10" selected>10분</option>
+                        <option value="20">20분</option>
+                        <option value="30">30분</option>
+                        <option value="40">40분</option>
+                        <option value="50">50분</option>
+                    </select>
+                </div>
             </div>
-            <textarea id="inputContent" rows="3" placeholder="여기에 상담 내용을 기록하세요..."></textarea>
-            <button class="btn-blue mt-10" onclick="addRecord()" style="width:100%;">저장하기</button>
+
+            <div class="mb-10" style="margin-bottom: 10px;">
+                <input type="text" id="inputTitle" class="w-full" placeholder="상담 제목을 입력하세요 (예: 교우관계 면담)" style="font-weight:bold;">
+            </div>
+
+            <textarea id="inputContent" rows="7" class="w-full" placeholder="여기에 상담 내용을 기록하세요..."></textarea>
+            <button class="btn-blue mt-10 w-full" onclick="addRecord()">저장하기</button>
         </div>
 
         <div class="flex" style="background:#eee; padding:10px; border-radius:5px; margin-bottom:20px;">
@@ -218,6 +294,16 @@
         <div class="grid-inputs" id="issueInputs"></div>
         <button class="btn-blue mt-20" onclick="saveSettings()">저장</button>
     </div>
+
+    <div id="tab-locations" class="hidden">
+        <div class="flex-between mb-10">
+            <h3>🏠 상담 장소 설정 (기본: 교실 + 추가 9개)</h3>
+            <button class="btn-gray" onclick="switchTab('main')">메인으로 돌아가기</button>
+        </div>
+        <p style="color:#666; font-size:0.9em; margin-bottom:10px;">* 첫 번째 '교실'은 기본값으로 고정됩니다.</p>
+        <div class="grid-inputs" id="locationInputs"></div>
+        <button class="btn-blue mt-20" onclick="saveSettings()">저장</button>
+    </div>
 </div>
 
 <script>
@@ -226,6 +312,7 @@
         pw: null,
         students: new Array(30).fill(""),
         issues: new Array(10).fill(""),
+        locations: new Array(9).fill(""), 
         records: []
     };
 
@@ -233,9 +320,20 @@
     window.onload = function() {
         const loaded = localStorage.getItem('counseling_db_pro');
         if (loaded) {
-            db = JSON.parse(loaded);
-            if (db.students.length < 30) db.students = [...db.students, ...new Array(30 - db.students.length).fill("")];
-            if (db.issues.length < 10) db.issues = [...db.issues, ...new Array(10 - db.issues.length).fill("")];
+            const parsed = JSON.parse(loaded);
+            db = { ...db, ...parsed };
+
+            // 데이터 마이그레이션
+            if(!db.locations) db.locations = new Array(9).fill("");
+            if(db.students.length < 30) db.students = [...db.students, ...new Array(30 - db.students.length).fill("")];
+            if(db.issues.length < 10) db.issues = [...db.issues, ...new Array(10 - db.issues.length).fill("")];
+            
+            db.records.forEach(r => {
+                if(!r.followups) r.followups = [];
+                if(!r.location) r.location = "교실";
+                if(!r.timeStr) r.timeStr = "10분";
+                if(!r.title) r.title = "";
+            });
         }
 
         if (!db.pw) {
@@ -276,7 +374,7 @@
     }
 
     function initResetProcess() {
-        if (!confirm("정말 초기화하시겠습니까?")) return;
+        if (!confirm("정말 초기화하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
         const rand = Math.floor(1000 + Math.random() * 9000);
         const input = prompt(`[초기화 확인]\n아래 숫자를 똑같이 입력하세요.\n\n${rand}`);
         
@@ -291,9 +389,9 @@
 
     // === 탭 관리 ===
     function switchTab(tabName) {
-        document.getElementById('tab-main').classList.add('hidden');
-        document.getElementById('tab-students').classList.add('hidden');
-        document.getElementById('tab-issues').classList.add('hidden');
+        ['main', 'students', 'issues', 'locations'].forEach(t => {
+            document.getElementById('tab-' + t).classList.add('hidden');
+        });
         
         document.getElementById('tab-' + tabName).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -309,14 +407,19 @@
         document.getElementById('issueInputs').innerHTML = db.issues.map((val, i) => `
             <div><small>순번 ${i+1}</small><input type="text" id="iss_${i}" value="${val}" placeholder="상담 종류"></div>
         `).join('');
+
+        document.getElementById('locationInputs').innerHTML = db.locations.map((val, i) => `
+            <div><small>추가 ${i+1}</small><input type="text" id="loc_${i}" value="${val}" placeholder="장소명"></div>
+        `).join('');
     }
 
     function saveSettings() {
         const oldIssues = [...db.issues];
         for(let i=0; i<30; i++) db.students[i] = document.getElementById(`std_${i}`).value.trim();
         for(let i=0; i<10; i++) db.issues[i] = document.getElementById(`iss_${i}`).value.trim();
+        for(let i=0; i<9; i++) db.locations[i] = document.getElementById(`loc_${i}`).value.trim();
 
-        // 이슈 이름 변경/삭제 대응
+        // 이슈 이름 변경 시 기존 기록 업데이트
         oldIssues.forEach((oldVal, idx) => {
             const newVal = db.issues[idx];
             if (oldVal !== "" && newVal === "") {
@@ -333,21 +436,23 @@
         switchTab('main');
     }
 
-    // [수정사항] '▽' 텍스트 제거 
     function refreshSelectOptions() {
-        const makeOpt = (arr, type) => {
-            let html = `<option value="">${type}</option>`; // ▽ 제거함
+        const makeOpt = (arr, type, defaultVal = null) => {
+            let html = `<option value="">${type}</option>`;
+            if (defaultVal) html = `<option value="${defaultVal}">${defaultVal}</option>`;
             arr.forEach(val => { if(val) html += `<option value="${val}">${val}</option>`; });
-            html += `<option value="기타">기타</option>`;
+            if (!defaultVal) html += `<option value="기타">기타</option>`;
             return html;
         };
         const sOpt = makeOpt(db.students, "학생 이름");
         const iOpt = makeOpt(db.issues, "상담 종류");
+        const lOpt = makeOpt(db.locations, "상담 장소", "교실"); 
 
         document.getElementById('inputStudent').innerHTML = sOpt;
         document.getElementById('filterStudent').innerHTML = sOpt;
         document.getElementById('inputIssue').innerHTML = iOpt;
         document.getElementById('filterIssue').innerHTML = iOpt;
+        document.getElementById('inputLocation').innerHTML = lOpt;
     }
 
     // === 기록 CRUD ===
@@ -355,7 +460,14 @@
         const date = document.getElementById('inputDate').value;
         const student = document.getElementById('inputStudent').value;
         const issue = document.getElementById('inputIssue').value;
+        const location = document.getElementById('inputLocation').value || "교실";
+        const title = document.getElementById('inputTitle').value.trim();
         const content = document.getElementById('inputContent').value;
+        
+        let h = document.getElementById('inputTimeHour').value;
+        let m = document.getElementById('inputTimeMin').value;
+        if(h == "0" && m == "0") m = "10";
+        const timeStr = (h == "0") ? `${m}분` : `${h}시간 ${m}분`;
 
         if(!date || !content) return alert("날짜와 내용은 필수입니다.");
 
@@ -364,12 +476,21 @@
             date,
             student: student || "기타",
             issue: issue || "기타",
+            location,
+            timeStr,
+            title,
             content,
             finished: false,
-            pdfChecked: false
+            pdfChecked: false,
+            followups: []
         });
         
+        // 입력창 초기화
         document.getElementById('inputContent').value = "";
+        document.getElementById('inputTitle').value = "";
+        document.getElementById('inputTimeHour').value = "0";
+        document.getElementById('inputTimeMin').value = "10";
+        
         saveDB();
         renderRecords();
     }
@@ -388,27 +509,75 @@
             const d = new Date(r.date);
             const dateStr = `${r.date} (${days[d.getDay()]})`;
 
+            // 후속 상담 HTML
+            const followupHtml = r.followups.map(f => `
+                <div class="followup-item">
+                    <div class="followup-date">↪ ${f.date} (후속 조치)</div>
+                    ${f.content}
+                </div>
+            `).join('');
+
             return `
             <div class="record-card ${r.finished ? 'finished' : ''} ${r.pdfChecked ? 'print-target' : ''}">
                 <div class="card-header">
-                    <span class="info-text" style="font-weight:bold;">📅 ${dateStr}</span>
+                    <span class="info-text">📅 ${dateStr}</span>
                     <span class="info-text">👤 <b>${r.student}</b></span>
-                    <span class="info-text" style="margin-right:20px;">📂 ${r.issue}</span>
+                    <span class="info-text">📂 ${r.issue}</span>
+                    <span class="info-text">🏠 ${r.location}</span>
+                    <span class="info-text">⏰ ${r.timeStr}</span>
                     
-                    <label class="info-label no-print">
-                        PDF 포함 <input type="checkbox" style="margin-left:5px;" onchange="togglePdfCheck(${r.id})" ${r.pdfChecked ? 'checked' : ''}>
+                    <span class="btn-followup no-print" onclick="toggleFollowupForm(${r.id})">
+                        ↪ 후속추가
+                    </span>
+
+                    <label class="info-label no-print" style="margin-left:10px;">
+                        PDF <input type="checkbox" style="margin-left:3px;" onchange="togglePdfCheck(${r.id})" ${r.pdfChecked ? 'checked' : ''}>
                     </label>
 
-                    <label class="info-label no-print">
-                        종료 <input type="checkbox" style="margin-left:5px;" onchange="toggleFinish(${r.id})" ${r.finished ? 'checked' : ''}>
+                    <label class="info-label no-print" style="margin-left:5px;">
+                        종료 <input type="checkbox" style="margin-left:3px;" onchange="toggleFinish(${r.id})" ${r.finished ? 'checked' : ''}>
                     </label>
                     
-                    <button class="btn-red no-print" onclick="deleteRecord(${r.id})" style="padding:4px 10px; font-size:0.85em;">삭제</button>
+                    <button class="btn-red no-print" onclick="deleteRecord(${r.id})" style="padding:4px 10px; font-size:0.85em; margin-left:auto;">삭제</button>
                 </div>
+                
+                ${r.title ? `<div class="record-title">${r.title}</div>` : ''}
                 <div class="record-content">${r.content}</div>
+
+                <div class="followup-container ${r.followups.length === 0 ? 'hidden' : ''}">
+                    ${followupHtml}
+                </div>
+
+                <div id="followup-form-${r.id}" class="followup-form hidden no-print">
+                    <textarea id="f-text-${r.id}" rows="2" placeholder="후속 조치 내용을 입력하세요..."></textarea>
+                    <div style="text-align:right;">
+                        <button class="btn-blue" onclick="saveFollowup(${r.id})" style="padding:4px 10px; font-size:0.9em;">저장하기</button>
+                    </div>
+                </div>
             </div>
             `;
         }).join('');
+    }
+
+    // === 후속 상담 기능 ===
+    function toggleFollowupForm(id) {
+        document.getElementById(`followup-form-${id}`).classList.toggle('hidden');
+    }
+
+    function saveFollowup(id) {
+        const text = document.getElementById(`f-text-${id}`).value;
+        if(!text.trim()) return alert("내용을 입력하세요.");
+        
+        const r = db.records.find(item => item.id === id);
+        if(r) {
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            
+            if(!r.followups) r.followups = [];
+            r.followups.push({ id: Date.now(), content: text, date: dateStr });
+            
+            saveDB(); renderRecords();
+        }
     }
 
     function toggleFinish(id) {
@@ -449,6 +618,8 @@
         reader.onload = function(e) {
             try {
                 const loaded = JSON.parse(e.target.result);
+                if(!loaded.locations) loaded.locations = new Array(9).fill("");
+
                 const choice = confirm("확인: [기존내용에 통합하기]\n취소: [삭제하고 덮어쓰기]");
                 
                 if(choice) { 
@@ -464,6 +635,13 @@
                             if(empty !== -1) db.issues[empty] = i;
                         }
                     });
+                    loaded.locations.forEach(l => {
+                        if(l && !db.locations.includes(l)) {
+                            const empty = db.locations.indexOf("");
+                            if(empty !== -1) db.locations[empty] = l;
+                        }
+                    });
+
                     const ids = new Set(db.records.map(r => r.id));
                     const newRecs = loaded.records.filter(r => !ids.has(r.id));
                     db.records = [...db.records, ...newRecs];
@@ -483,11 +661,21 @@
 
     function printPDF() {
         const hasChecked = db.records.some(r => r.pdfChecked);
+        let targetRecords = db.records;
+
         if (hasChecked) {
             document.body.classList.add('print-selected-only'); 
+            targetRecords = db.records.filter(r => r.pdfChecked);
         } else {
             document.body.classList.remove('print-selected-only'); 
         }
+
+        let mainCount = targetRecords.length;
+        let subCount = targetRecords.reduce((acc, r) => acc + (r.followups ? r.followups.length : 0), 0);
+        let total = mainCount + subCount;
+
+        document.getElementById('printCountArea').innerText = `총 상담 건수: ${total}회 (본 상담 ${mainCount}건 + 후속 ${subCount}건)`;
+
         window.print();
         document.body.classList.remove('print-selected-only');
     }
