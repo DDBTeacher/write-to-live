@@ -1,3 +1,13 @@
+<!-- # 적자생존 (Write to Live) - 학교 상담 기록 웹앱
+
+선생님들의 안전하고 편리한 상담 기록을 위해 제작된 웹 애플리케이션입니다.
+모든 데이터는 서버가 아닌 사용자의 브라우저(로컬)에만 저장되어 보안에 강력합니다.
+
+## 저작권 및 라이선스
+이 프로그램의 기획, 설계 및 디자인 저작권은 **DDBTeacher(도도샘)**에게 있습니다.
+비영리 목적으로 누구나 자유롭게 사용할 수 있습니다.
+(문의: ddbteacher@naver.com)-->
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -42,20 +52,19 @@
             font-family: 'Gowun Dodum', sans-serif; 
         }
 
-        /* [NEW] 추가된 링크 영역 스타일 */
+        /* 링크 영역 */
         .header-links {
             margin-top: 10px;
             display: flex;
             flex-direction: column;
             gap: 5px;
-            font-size: 0.85em; /* 폰트 크기 조정 */
+            font-size: 0.85em; 
             width: 100%;
             align-items: center;
             padding-top: 8px;
             border-top: 1px dashed #ddd;
         }
         
-        /* 유튜브 링크 스타일 */
         .header-links a {
             text-decoration: none;
             color: #555;
@@ -70,13 +79,12 @@
             font-weight: bold;
         }
 
-        /* 이메일 텍스트 스타일 (클릭 안됨) */
         .header-email {
             color: #555;
             display: flex;
             align-items: center;
             gap: 6px;
-            cursor: default; /* 마우스 커서 기본값 */
+            cursor: default; 
             white-space: nowrap;
         }
         
@@ -92,7 +100,7 @@
         }
         .print-count-area { display: none; font-size: 0.6em; color: red; font-weight: bold; margin-top: 5px; width: 100%; text-align: left; padding-left: 20px;}
 
-        /* 유틸리티 & 레이아웃 */
+        /* 유틸리티 */
         .container { max-width: 1100px; margin: 0 auto; }
         .flex { display: flex; gap: 10px; align-items: center; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
@@ -101,7 +109,7 @@
         .mt-20 { margin-top: 20px; }
         .w-full { width: 100%; box-sizing: border-box; }
         
-        /* 버튼 스타일 */
+        /* 버튼 */
         button { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; white-space: nowrap; }
         .btn-blue { background: var(--accent); color: white; }
         .btn-blue:hover { background: #2980b9; }
@@ -109,7 +117,7 @@
         .btn-red { background: var(--danger); color: white; }
         .btn-green { background: var(--success); color: white; }
 
-        /* 후속 상담 버튼 */
+        /* 후속 버튼 */
         .btn-followup {
             background: white;
             color: var(--accent);
@@ -128,7 +136,7 @@
         .top-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         .security-notice { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; font-size: 0.9em; line-height: 1.6; margin-bottom: 20px; }
 
-        /* 탭 네비게이션 */
+        /* 탭 */
         .nav-tabs { display: flex; border-bottom: 2px solid #aaa; margin-bottom: 20px; }
         .nav-item { padding: 10px 20px; cursor: pointer; font-weight: bold; color: #777; background: #eee; margin-right: 5px; border-radius: 5px 5px 0 0; }
         .nav-item.active { background: var(--accent); color: white; }
@@ -145,7 +153,7 @@
         .time-group { display: flex; gap: 5px; flex: 1.2; align-items: center; }
         .time-group select { flex: 1; }
         
-        /* 상담 기록 카드 */
+        /* 기록 카드 */
         .record-card { 
             background: white; border: 1px solid #ddd; border-left: 5px solid var(--accent); 
             padding: 10px 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -174,12 +182,22 @@
         #overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.98); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .password-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border: 1px solid #ddd; width: 300px; }
         
+        /* 인쇄(PDF) 설정 */
         @media print {
             body { background: white; padding: 0; }
             #overlay, .top-actions, .security-notice, .nav-tabs, .input-area, .no-print { display: none !important; }
             header { margin-bottom: 10px; border: 1px solid #000; } 
             .print-count-area { display: block; border-bottom: 2px solid red; margin-bottom: 10px;}
+            
+            /* 체크된 것만 인쇄 */
             body.print-selected-only .record-card:not(.print-target) { display: none !important; }
+
+            /* [NEW] 요약 인쇄 모드 (내용, 후속 숨김) */
+            body.print-summary-only .record-content,
+            body.print-summary-only .followup-container {
+                display: none !important;
+            }
+            
             .record-card { break-inside: avoid; border: 1px solid #555; margin-bottom: 15px; box-shadow: none; page-break-inside: avoid; }
             .card-header { border-bottom: 1px solid #888; flex-wrap: wrap; white-space: normal; }
             input[type="checkbox"] { display: none; } 
@@ -285,7 +303,7 @@
             <button class="btn-blue mt-10 w-full" onclick="addRecord()">저장하기</button>
         </div>
 
-        <div class="flex" style="background:#eee; padding:10px; border-radius:5px; margin-bottom:20px;">
+        <div class="flex no-print" style="background:#eee; padding:10px; border-radius:5px; margin-bottom:20px;">
             <b style="min-width: 70px;">🔍 모아보기</b>
             <select id="filterStudent" style="flex:1;"><option value="">학생 이름</option></select>
             <select id="filterIssue" style="flex:1;"><option value="">상담 종류</option></select>
@@ -676,17 +694,32 @@
         reader.readAsText(file);
     }
 
+    // [NEW] 인쇄 로직 변경: 선택 모드 지원
     function printPDF() {
         const hasChecked = db.records.some(r => r.pdfChecked);
-        let targetRecords = db.records;
-
         if (hasChecked) {
             document.body.classList.add('print-selected-only'); 
-            targetRecords = db.records.filter(r => r.pdfChecked);
         } else {
             document.body.classList.remove('print-selected-only'); 
         }
 
+        // 출력 방식 질문
+        const choice = confirm(
+            "PDF/프린트 방식을 결정할 수 있습니다.\n\n" +
+            "확인: 기본상담 정보 및 상담의 모든 내용 출력\n" +
+            "취소: 기본상담 정보와 제목만 출력 (내용 숨김)"
+        );
+
+        if (choice) {
+            // 전체 출력 (기존 방식)
+            document.body.classList.remove('print-summary-only');
+        } else {
+            // 요약 출력 (내용, 후속 숨김)
+            document.body.classList.add('print-summary-only');
+        }
+
+        // 건수 업데이트
+        let targetRecords = hasChecked ? db.records.filter(r => r.pdfChecked) : db.records;
         let mainCount = targetRecords.length;
         let subCount = targetRecords.reduce((acc, r) => acc + (r.followups ? r.followups.length : 0), 0);
         let total = mainCount + subCount;
@@ -694,9 +727,13 @@
         document.getElementById('printCountArea').innerText = `총 상담 건수: ${total}회 (본 상담 ${mainCount}건 + 후속 ${subCount}건)`;
 
         window.print();
+        
+        // 초기화
         document.body.classList.remove('print-selected-only');
+        document.body.classList.remove('print-summary-only');
     }
 </script>
 
 </body>
 </html>
+Copyright ⓒ 2025 DDBTeacher
