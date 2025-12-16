@@ -8,7 +8,6 @@
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; --danger: #e74c3c; --border: #dfe6e9; --success: #2ecc71; }
         
-        /* 기본 폰트: 깔끔한 고딕체 유지 */
         body { 
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
             background: var(--bg); margin: 0; padding: 20px; color: #333; 
@@ -34,16 +33,42 @@
         }
         .header-left img { width: 80px; height: auto; margin-bottom: 5px; }
         
-        /* DDBTeacher: 부드러운 폰트 적용 */
-        .header-left span { 
+        /* DDBTeacher 텍스트 */
+        .header-left span.brand-name { 
             font-weight: bold; 
             color: black; 
             font-size: 1.1em; 
             text-decoration: none;
             font-family: 'Gowun Dodum', sans-serif; 
         }
+
+        /* [NEW] 추가된 링크 스타일 */
+        .header-links {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.8em;
+            width: 100%;
+            align-items: center;
+            padding-top: 8px;
+            border-top: 1px dashed #ddd;
+        }
+        .header-links a {
+            text-decoration: none;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            white-space: nowrap; /* 줄바꿈 방지 */
+        }
+        .header-links a:hover {
+            color: var(--accent);
+            font-weight: bold;
+        }
         
-        /* 메인 타이틀: 부드러운 폰트 적용 */
+        /* 메인 타이틀 */
         .header-title {
             display: flex;
             align-items: center;
@@ -53,7 +78,6 @@
             font-weight: normal;
             flex-direction: column;
         }
-        /* PDF 출력 시 상담 건수 표시용 */
         .print-count-area { display: none; font-size: 0.6em; color: red; font-weight: bold; margin-top: 5px; width: 100%; text-align: left; padding-left: 20px;}
 
         /* 유틸리티 & 레이아웃 */
@@ -73,12 +97,12 @@
         .btn-red { background: var(--danger); color: white; }
         .btn-green { background: var(--success); color: white; }
 
-        /* 후속 상담 버튼 스타일 (NEW) */
+        /* 후속 상담 버튼 */
         .btn-followup {
             background: white;
             color: var(--accent);
             border: 1px solid var(--accent);
-            border-radius: 15px; /* 둥근 모양 */
+            border-radius: 15px; 
             padding: 2px 10px;
             font-size: 0.85em;
             cursor: pointer;
@@ -87,15 +111,9 @@
             transition: all 0.2s;
             margin-left: 10px;
         }
-        .btn-followup:hover {
-            background: var(--accent);
-            color: white;
-        }
+        .btn-followup:hover { background: var(--accent); color: white; }
         
-        /* 상단 기능 버튼 그룹 */
         .top-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-
-        /* 보안 안내 박스 */
         .security-notice { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; font-size: 0.9em; line-height: 1.6; margin-bottom: 20px; }
 
         /* 탭 네비게이션 */
@@ -107,41 +125,25 @@
         .input-area { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
         input, select, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
-        /* 입력 레이아웃 최적화 (한 줄 정렬 NEW) */
         .input-compact-row { 
-            display: flex; 
-            gap: 8px; 
-            margin-bottom: 10px; 
-            align-items: center; 
-            flex-wrap: nowrap; /* 줄바꿈 방지 */
+            display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: nowrap;
         }
         .input-compact-row input[type="date"] { width: 135px; flex-shrink: 0; }
-        .input-compact-row select { flex: 1; min-width: 0; } /* 공간 균등 분배 */
+        .input-compact-row select { flex: 1; min-width: 0; }
         .time-group { display: flex; gap: 5px; flex: 1.2; align-items: center; }
         .time-group select { flex: 1; }
         
         /* 상담 기록 카드 */
         .record-card { 
-            background: white; 
-            border: 1px solid #ddd; 
-            border-left: 5px solid var(--accent); 
-            padding: 10px 20px; 
-            margin-bottom: 15px; 
-            border-radius: 8px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            background: white; border: 1px solid #ddd; border-left: 5px solid var(--accent); 
+            padding: 10px 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .record-card.finished { border-left-color: #95a5a6; background: #f2f2f2; opacity: 0.9; }
         
         .card-header {
-            display: flex;
-            align-items: center; 
-            gap: 15px;           
-            width: 100%;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #eee;
-            white-space: nowrap; 
-            overflow-x: auto;    
+            display: flex; align-items: center; gap: 15px; width: 100%;
+            padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #eee;
+            white-space: nowrap; overflow-x: auto;    
         }
 
         .info-text { font-size: 1.0em; color: #333; display: flex; align-items: center; gap: 4px;}
@@ -149,33 +151,27 @@
         .record-title { font-weight: bold; font-size: 1.1em; color: var(--primary); margin-bottom: 5px; display: block; border-bottom: 1px dashed #eee; padding-bottom: 5px;}
         .record-content { white-space: pre-wrap; line-height: 1.5; color: #2c3e50; font-size: 1.05em; padding-left: 2px; }
 
-        /* 후속 상담 영역 */
+        /* 후속 상담 */
         .followup-container { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; }
         .followup-item { background: #f1f8ff; padding: 10px; border-radius: 6px; margin-bottom: 5px; font-size: 0.95em; border-left: 3px solid var(--accent); }
         .followup-date { font-size: 0.8em; color: #777; margin-bottom: 4px; font-weight: bold;}
         .followup-form { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; background: #eee; padding: 10px; border-radius: 5px;}
 
-        /* 설정창 그리드 */
         .grid-inputs { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
         
-        /* 초기화면(암호) */
         #overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.98); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .password-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border: 1px solid #ddd; width: 300px; }
         
-        /* 인쇄(PDF) 설정 */
         @media print {
             body { background: white; padding: 0; }
             #overlay, .top-actions, .security-notice, .nav-tabs, .input-area, .no-print { display: none !important; }
             header { margin-bottom: 10px; border: 1px solid #000; } 
             .print-count-area { display: block; border-bottom: 2px solid red; margin-bottom: 10px;}
-            
             body.print-selected-only .record-card:not(.print-target) { display: none !important; }
-            
             .record-card { break-inside: avoid; border: 1px solid #555; margin-bottom: 15px; box-shadow: none; page-break-inside: avoid; }
             .card-header { border-bottom: 1px solid #888; flex-wrap: wrap; white-space: normal; }
             input[type="checkbox"] { display: none; } 
             .info-label { margin-right: 10px; }
-            /* 인쇄 시 후속 상담 입력창은 숨김 */
             .followup-form { display: none !important; }
         }
     </style>
@@ -210,8 +206,18 @@
     <header>
         <div class="header-left">
             <img src="dodo.png" alt="도도" onerror="this.style.display='none';">
-            <span>DDBTeacher</span>
+            <span class="brand-name">DDBTeacher</span>
+            
+            <div class="header-links no-print">
+                <a href="https://www.youtube.com/@DDBteacher" target="_blank" title="유튜브 바로가기">
+                    <span style="color:#FF0000; font-size:1.1em;">▶</span> YouTube
+                </a>
+                <a href="mailto:ddbteacher@naver.com" title="이메일 보내기">
+                    <span style="font-size:1.1em;">✉</span> Email
+                </a>
+            </div>
         </div>
+        
         <div class="header-title">
             <div>- Write to Live - 적자생존 -</div>
             <div id="printCountArea" class="print-count-area">총 상담 건수: 0회</div>
@@ -509,7 +515,6 @@
             const d = new Date(r.date);
             const dateStr = `${r.date} (${days[d.getDay()]})`;
 
-            // 후속 상담 HTML
             const followupHtml = r.followups.map(f => `
                 <div class="followup-item">
                     <div class="followup-date">↪ ${f.date} (후속 조치)</div>
