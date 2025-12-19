@@ -14,91 +14,26 @@ Copyright ⓒ 2025 DDBTeacher
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>적자생존 - Write to Live</title>
+    <title>적자생존 - Write to Live (Encrypted)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
     <style>
+        /* 기존 디자인 CSS 유지 */
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; --danger: #e74c3c; --border: #dfe6e9; --success: #2ecc71; }
-        
-        body { 
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
-            background: var(--bg); margin: 0; padding: 20px; color: #333; 
-        }
-        
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         button, input, select, textarea { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; }
 
-        /* === 헤더 디자인 === */
-        header { 
-            display: grid; 
-            grid-template-columns: 180px 1fr; 
-            border: 2px solid #333; 
-            background: white; 
-            margin-bottom: 20px;
-        }
-        .header-left {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-            border-right: 2px solid #333;
-        }
+        /* 헤더 */
+        header { display: grid; grid-template-columns: 180px 1fr; border: 2px solid #333; background: white; margin-bottom: 20px; }
+        .header-left { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; border-right: 2px solid #333; }
         .header-left img { width: 80px; height: auto; margin-bottom: 5px; }
-        
-        /* DDBTeacher 텍스트 */
-        .header-left span.brand-name { 
-            font-weight: bold; 
-            color: black; 
-            font-size: 1.1em; 
-            text-decoration: none;
-            font-family: 'Gowun Dodum', sans-serif; 
-        }
-
-        /* 링크 영역 */
-        .header-links {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            font-size: 0.85em; 
-            width: 100%;
-            align-items: center;
-            padding-top: 8px;
-            border-top: 1px dashed #ddd;
-        }
-        
-        .header-links a {
-            text-decoration: none;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.2s;
-            white-space: nowrap; 
-        }
-        .header-links a:hover {
-            color: var(--accent);
-            font-weight: bold;
-        }
-
-        .header-email {
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: default; 
-            white-space: nowrap;
-        }
-        
-        /* 메인 타이틀 */
-        .header-title {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5em; 
-            font-family: 'Gowun Dodum', sans-serif; 
-            font-weight: normal;
-            flex-direction: column;
-        }
+        .brand-name { font-weight: bold; color: black; font-size: 1.1em; text-decoration: none; font-family: 'Gowun Dodum', sans-serif; }
+        .header-links { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; font-size: 0.85em; width: 100%; align-items: center; padding-top: 8px; border-top: 1px dashed #ddd; }
+        .header-links a { text-decoration: none; color: #555; display: flex; align-items: center; gap: 6px; transition: 0.2s; white-space: nowrap; }
+        .header-links a:hover { color: var(--accent); font-weight: bold; }
+        .header-email { color: #555; display: flex; align-items: center; gap: 6px; cursor: default; white-space: nowrap; }
+        .header-title { display: flex; align-items: center; justify-content: center; font-size: 2.5em; font-family: 'Gowun Dodum', sans-serif; font-weight: normal; flex-direction: column; }
         .print-count-area { display: none; font-size: 0.6em; color: red; font-weight: bold; margin-top: 5px; width: 100%; text-align: left; padding-left: 20px;}
 
         /* 유틸리티 */
@@ -118,23 +53,12 @@ Copyright ⓒ 2025 DDBTeacher
         .btn-red { background: var(--danger); color: white; }
         .btn-green { background: var(--success); color: white; }
 
-        /* 후속 버튼 */
-        .btn-followup {
-            background: white;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            border-radius: 15px; 
-            padding: 2px 10px;
-            font-size: 0.85em;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            transition: all 0.2s;
-            margin-left: 10px;
-        }
+        .btn-followup { background: white; color: var(--accent); border: 1px solid var(--accent); border-radius: 15px; padding: 2px 10px; font-size: 0.85em; cursor: pointer; display: inline-flex; align-items: center; transition: all 0.2s; margin-left: 10px; }
         .btn-followup:hover { background: var(--accent); color: white; }
         
         .top-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        
+        /* 보안 안내 박스 (요청하신 내용 복원) */
         .security-notice { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 5px; font-size: 0.9em; line-height: 1.6; margin-bottom: 20px; }
 
         /* 탭 */
@@ -146,26 +70,17 @@ Copyright ⓒ 2025 DDBTeacher
         .input-area { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
         input, select, textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
-        .input-compact-row { 
-            display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: nowrap;
-        }
+        .input-compact-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: nowrap; }
         .input-compact-row input[type="date"] { width: 135px; flex-shrink: 0; }
         .input-compact-row select { flex: 1; min-width: 0; }
         .time-group { display: flex; gap: 5px; flex: 1.2; align-items: center; }
         .time-group select { flex: 1; }
         
         /* 기록 카드 */
-        .record-card { 
-            background: white; border: 1px solid #ddd; border-left: 5px solid var(--accent); 
-            padding: 10px 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+        .record-card { background: white; border: 1px solid #ddd; border-left: 5px solid var(--accent); padding: 10px 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .record-card.finished { border-left-color: #95a5a6; background: #f2f2f2; opacity: 0.9; }
         
-        .card-header {
-            display: flex; align-items: center; gap: 15px; width: 100%;
-            padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #eee;
-            white-space: nowrap; overflow-x: auto;    
-        }
+        .card-header { display: flex; align-items: center; gap: 15px; width: 100%; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #eee; white-space: nowrap; overflow-x: auto; }
 
         .info-text { font-size: 1.0em; color: #333; display: flex; align-items: center; gap: 4px;}
         .info-label { color: #555; margin-right: 5px; display: flex; align-items: center; cursor: pointer; font-size: 0.95em;}
@@ -189,16 +104,9 @@ Copyright ⓒ 2025 DDBTeacher
             #overlay, .top-actions, .security-notice, .nav-tabs, .input-area, .no-print { display: none !important; }
             header { margin-bottom: 10px; border: 1px solid #000; } 
             .print-count-area { display: block; border-bottom: 2px solid red; margin-bottom: 10px;}
-            
-            /* 체크된 것만 인쇄 */
             body.print-selected-only .record-card:not(.print-target) { display: none !important; }
-
-            /* [NEW] 요약 인쇄 모드 (내용, 후속 숨김) */
             body.print-summary-only .record-content,
-            body.print-summary-only .followup-container {
-                display: none !important;
-            }
-            
+            body.print-summary-only .followup-container { display: none !important; }
             .record-card { break-inside: avoid; border: 1px solid #555; margin-bottom: 15px; box-shadow: none; page-break-inside: avoid; }
             .card-header { border-bottom: 1px solid #888; flex-wrap: wrap; white-space: normal; }
             input[type="checkbox"] { display: none; } 
@@ -226,10 +134,11 @@ Copyright ⓒ 2025 DDBTeacher
         <button class="btn-gray" onclick="switchTab('students')">학생 목록</button>
         <button class="btn-gray" onclick="switchTab('issues')">상담 종류 목록</button>
         <button class="btn-gray" onclick="switchTab('locations')">장소 관리</button>
+       
         <span style="border-right: 1px solid #ccc; margin: 0 5px;"></span>
-        <button class="btn-gray" onclick="exportJSON()">내보내기</button>
+        <button class="btn-gray" onclick="exportJSON()">내보내기(암호화)</button>
         <input type="file" id="fileInput" class="hidden" onchange="importJSON(event)">
-        <button class="btn-gray" onclick="document.getElementById('fileInput').click()">불러오기</button>
+        <button class="btn-gray" onclick="document.getElementById('fileInput').click()">불러오기(복호화)</button>
         <button class="btn-blue" onclick="printPDF()">PDF</button>
         <button class="btn-red" onclick="initResetProcess()">초기화</button>
     </div>
@@ -238,7 +147,6 @@ Copyright ⓒ 2025 DDBTeacher
         <div class="header-left">
             <img src="dodo.png" alt="도도" onerror="this.style.display='none';">
             <span class="brand-name">DDBTeacher</span>
-            
             <div class="header-links no-print">
                 <a href="https://www.youtube.com/@DDBteacher" target="_blank" title="유튜브 바로가기">
                     <span style="color:#FF0000; font-size:1.1em;">▶</span> YouTube
@@ -344,6 +252,11 @@ Copyright ⓒ 2025 DDBTeacher
 </div>
 
 <script>
+    // [중요] 암호화 키
+    const SECRET_KEY = "DDBTeacher_Secure_Counseling_2025"; 
+    // [중요] 기존 데이터와 연동하기 위해 Key 이름을 원래대로 복구 ('counseling_db')
+    const DB_KEY = 'counseling_db';
+
     // === 데이터 구조 ===
     let db = {
         pw: null,
@@ -353,24 +266,61 @@ Copyright ⓒ 2025 DDBTeacher
         records: []
     };
 
-    // === 초기화 ===
-    window.onload = function() {
-        const loaded = localStorage.getItem('counseling_db_pro');
-        if (loaded) {
-            const parsed = JSON.parse(loaded);
-            db = { ...db, ...parsed };
+    // 암호화 함수
+    function encryptData(dataObj) {
+        try {
+            const stringified = JSON.stringify(dataObj);
+            return CryptoJS.AES.encrypt(stringified, SECRET_KEY).toString();
+        } catch (e) {
+            console.error("암호화 실패", e);
+            return null;
+        }
+    }
 
-            // 데이터 마이그레이션
-            if(!db.locations) db.locations = new Array(9).fill("");
-            if(db.students.length < 30) db.students = [...db.students, ...new Array(30 - db.students.length).fill("")];
-            if(db.issues.length < 10) db.issues = [...db.issues, ...new Array(10 - db.issues.length).fill("")];
-            
-            db.records.forEach(r => {
-                if(!r.followups) r.followups = [];
-                if(!r.location) r.location = "교실";
-                if(!r.timeStr) r.timeStr = "10분";
-                if(!r.title) r.title = "";
-            });
+    // 복호화 함수
+    function decryptData(cipherText) {
+        try {
+            const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
+            const decryptedStr = bytes.toString(CryptoJS.enc.Utf8);
+            if(!decryptedStr) return null; // 복호화 결과가 없으면 null
+            return JSON.parse(decryptedStr);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // === 초기화 (데이터 로드 로직 개선) ===
+    window.onload = function() {
+        const loaded = localStorage.getItem(DB_KEY);
+        if (loaded) {
+            let parsed = null;
+
+            // 시나리오 1: 데이터가 이미 암호화된 경우 (최신 버전 데이터)
+            parsed = decryptData(loaded);
+
+            // 시나리오 2: 데이터가 암호화되지 않은 옛날 JSON인 경우 (구버전 데이터 마이그레이션)
+            if (!parsed) {
+                try {
+                    parsed = JSON.parse(loaded);
+                    console.log("기존 평문 데이터를 발견하여 로드했습니다. 다음 저장 시 암호화됩니다.");
+                } catch(e) {
+                    console.error("데이터 손상 또는 알 수 없는 형식");
+                }
+            }
+
+            if (parsed) {
+                db = { ...db, ...parsed };
+                // 데이터 정합성 체크
+                if(!db.locations) db.locations = new Array(9).fill("");
+                if(db.students.length < 30) db.students = [...db.students, ...new Array(30 - db.students.length).fill("")];
+                if(db.issues.length < 10) db.issues = [...db.issues, ...new Array(10 - db.issues.length).fill("")];
+                db.records.forEach(r => {
+                    if(!r.followups) r.followups = [];
+                    if(!r.location) r.location = "교실";
+                    if(!r.timeStr) r.timeStr = "10분";
+                    if(!r.title) r.title = "";
+                });
+            }
         }
 
         if (!db.pw) {
@@ -407,16 +357,15 @@ Copyright ⓒ 2025 DDBTeacher
         document.getElementById('overlay').classList.add('hidden');
         renderInputs(); 
         refreshSelectOptions();
-        renderRecords();
+        renderRecords(); 
     }
 
     function initResetProcess() {
         if (!confirm("정말 초기화하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
         const rand = Math.floor(1000 + Math.random() * 9000);
         const input = prompt(`[초기화 확인]\n아래 숫자를 똑같이 입력하세요.\n\n${rand}`);
-        
         if (input == rand) {
-            localStorage.removeItem('counseling_db_pro');
+            localStorage.removeItem(DB_KEY);
             alert("초기화되었습니다. 새로고침합니다.");
             location.reload();
         } else {
@@ -429,7 +378,6 @@ Copyright ⓒ 2025 DDBTeacher
         ['main', 'students', 'issues', 'locations'].forEach(t => {
             document.getElementById('tab-' + t).classList.add('hidden');
         });
-        
         document.getElementById('tab-' + tabName).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         if(tabName === 'main') document.querySelector('.nav-item').classList.add('active');
@@ -440,11 +388,9 @@ Copyright ⓒ 2025 DDBTeacher
         document.getElementById('studentInputs').innerHTML = db.students.map((val, i) => `
             <div><small>번호 ${i+1}</small><input type="text" id="std_${i}" value="${val}" placeholder="학생 이름"></div>
         `).join('');
-
         document.getElementById('issueInputs').innerHTML = db.issues.map((val, i) => `
             <div><small>순번 ${i+1}</small><input type="text" id="iss_${i}" value="${val}" placeholder="상담 종류"></div>
         `).join('');
-
         document.getElementById('locationInputs').innerHTML = db.locations.map((val, i) => `
             <div><small>추가 ${i+1}</small><input type="text" id="loc_${i}" value="${val}" placeholder="장소명"></div>
         `).join('');
@@ -461,11 +407,11 @@ Copyright ⓒ 2025 DDBTeacher
             const newVal = db.issues[idx];
             if (oldVal !== "" && newVal === "") {
                 db.records.forEach(r => { if (r.issue === oldVal) r.issue = "기타"; });
-            } else if (oldVal !== "" && newVal !== "" && oldVal !== newVal) {
+            } else 
+            if (oldVal !== "" && newVal !== "" && oldVal !== newVal) {
                 db.records.forEach(r => { if (r.issue === oldVal) r.issue = newVal; });
             }
         });
-
         saveDB();
         refreshSelectOptions();
         renderRecords();
@@ -504,10 +450,10 @@ Copyright ⓒ 2025 DDBTeacher
         let h = document.getElementById('inputTimeHour').value;
         let m = document.getElementById('inputTimeMin').value;
         if(h == "0" && m == "0") m = "10";
-        const timeStr = (h == "0") ? `${m}분` : `${h}시간 ${m}분`;
+        const timeStr = (h == "0") ?
+        `${m}분` : `${h}시간 ${m}분`;
 
         if(!date || !content) return alert("날짜와 내용은 필수입니다.");
-
         db.records.push({
             id: Date.now(),
             date,
@@ -522,7 +468,6 @@ Copyright ⓒ 2025 DDBTeacher
             followups: []
         });
         
-        // 입력창 초기화
         document.getElementById('inputContent').value = "";
         document.getElementById('inputTitle').value = "";
         document.getElementById('inputTimeHour').value = "0";
@@ -539,9 +484,7 @@ Copyright ⓒ 2025 DDBTeacher
 
         let filtered = db.records.filter(r => (!fStu || r.student === fStu) && (!fIss || r.issue === fIss));
         filtered.sort((a, b) => (a.finished - b.finished) || (new Date(b.date) - new Date(a.date)));
-
         const days = ['일', '월', '화', '수', '목', '금', '토'];
-
         list.innerHTML = filtered.map(r => {
             const d = new Date(r.date);
             const dateStr = `${r.date} (${days[d.getDay()]})`;
@@ -567,16 +510,18 @@ Copyright ⓒ 2025 DDBTeacher
                     </span>
 
                     <label class="info-label no-print" style="margin-left:10px;">
-                        PDF <input type="checkbox" style="margin-left:3px;" onchange="togglePdfCheck(${r.id})" ${r.pdfChecked ? 'checked' : ''}>
+                        PDF <input type="checkbox" style="margin-left:3px;" onchange="togglePdfCheck(${r.id})" ${r.pdfChecked ?
+'checked' : ''}>
                     </label>
 
                     <label class="info-label no-print" style="margin-left:5px;">
-                        종료 <input type="checkbox" style="margin-left:3px;" onchange="toggleFinish(${r.id})" ${r.finished ? 'checked' : ''}>
+                        종료 <input type="checkbox" style="margin-left:3px;"
+onchange="toggleFinish(${r.id})" ${r.finished ? 'checked' : ''}>
                     </label>
                     
                     <button class="btn-red no-print" onclick="deleteRecord(${r.id})" style="padding:4px 10px; font-size:0.85em; margin-left:auto;">삭제</button>
                 </div>
-                
+            
                 ${r.title ? `<div class="record-title">${r.title}</div>` : ''}
                 <div class="record-content">${r.content}</div>
 
@@ -634,16 +579,25 @@ Copyright ⓒ 2025 DDBTeacher
         }
     }
 
+    // [NEW] 저장 시 암호화 적용 (키 이름 변경됨: counseling_db)
     function saveDB() {
-        localStorage.setItem('counseling_db_pro', JSON.stringify(db));
+        const encrypted = encryptData(db); 
+        if (encrypted) {
+            localStorage.setItem(DB_KEY, encrypted);
+        } else {
+            alert("저장 중 오류가 발생했습니다. (암호화 실패)");
+        }
     }
 
     // === 백업/복원/PDF ===
     function exportJSON() {
-        const blob = new Blob([JSON.stringify(db, null, 2)], {type: "application/json"});
+        const encrypted = encryptData(db); 
+        if (!encrypted) return alert("암호화 오류로 내보낼 수 없습니다.");
+
+        const blob = new Blob([encrypted], {type: "text/plain"});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `상담백업_${new Date().toISOString().slice(0,10)}.json`;
+        a.download = `상담백업_암호화_${new Date().toISOString().slice(0,10)}.txt`; 
         a.click();
     }
 
@@ -653,11 +607,22 @@ Copyright ⓒ 2025 DDBTeacher
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const loaded = JSON.parse(e.target.result);
+                const fileContent = e.target.result;
+                // 1. 암호화된 파일이라고 가정하고 복호화 시도
+                let loaded = decryptData(fileContent); 
+
+                // 2. 복호화 실패 시 (옛날 평문 백업 파일일 수 있음)
+                if (!loaded) {
+                    try {
+                        loaded = JSON.parse(fileContent);
+                    } catch(err) {
+                        return alert("파일 형식이 올바르지 않거나 암호화 키가 다릅니다.");
+                    }
+                }
+
                 if(!loaded.locations) loaded.locations = new Array(9).fill("");
 
                 const choice = confirm("확인: [기존내용에 통합하기]\n취소: [삭제하고 덮어쓰기]");
-                
                 if(choice) { 
                     loaded.students.forEach(s => {
                         if(s && !db.students.includes(s)) {
@@ -677,7 +642,6 @@ Copyright ⓒ 2025 DDBTeacher
                             if(empty !== -1) db.locations[empty] = l;
                         }
                     });
-
                     const ids = new Set(db.records.map(r => r.id));
                     const newRecs = loaded.records.filter(r => !ids.has(r.id));
                     db.records = [...db.records, ...newRecs];
@@ -690,37 +654,32 @@ Copyright ⓒ 2025 DDBTeacher
                 }
                 saveDB();
                 location.reload();
-            } catch(err) { alert("파일 오류입니다."); }
+            } catch(err) { alert("파일 처리 중 오류가 발생했습니다."); }
         };
         reader.readAsText(file);
     }
 
-    // [NEW] 인쇄 로직 변경: 선택 모드 지원
     function printPDF() {
         const hasChecked = db.records.some(r => r.pdfChecked);
         if (hasChecked) {
-            document.body.classList.add('print-selected-only'); 
+            document.body.classList.add('print-selected-only');
         } else {
-            document.body.classList.remove('print-selected-only'); 
+            document.body.classList.remove('print-selected-only');
         }
 
-        // 출력 방식 질문
         const choice = confirm(
             "PDF/프린트 방식을 결정할 수 있습니다.\n\n" +
             "확인: 기본상담 정보 및 상담의 모든 내용 출력\n" +
             "취소: 기본상담 정보와 제목만 출력 (내용 숨김)"
         );
-
         if (choice) {
-            // 전체 출력 (기존 방식)
             document.body.classList.remove('print-summary-only');
         } else {
-            // 요약 출력 (내용, 후속 숨김)
             document.body.classList.add('print-summary-only');
         }
 
-        // 건수 업데이트
-        let targetRecords = hasChecked ? db.records.filter(r => r.pdfChecked) : db.records;
+        let targetRecords = hasChecked ?
+        db.records.filter(r => r.pdfChecked) : db.records;
         let mainCount = targetRecords.length;
         let subCount = targetRecords.reduce((acc, r) => acc + (r.followups ? r.followups.length : 0), 0);
         let total = mainCount + subCount;
@@ -728,8 +687,6 @@ Copyright ⓒ 2025 DDBTeacher
         document.getElementById('printCountArea').innerText = `총 상담 건수: ${total}회 (본 상담 ${mainCount}건 + 후속 ${subCount}건)`;
 
         window.print();
-        
-        // 초기화
         document.body.classList.remove('print-selected-only');
         document.body.classList.remove('print-summary-only');
     }
@@ -737,4 +694,4 @@ Copyright ⓒ 2025 DDBTeacher
 
 </body>
 </html>
-Copyright ⓒ 2025 DDBTeacher
+Copyright ⓒ 2025 DDBTeacher / 1.5v
