@@ -594,10 +594,10 @@ onchange="toggleFinish(${r.id})" ${r.finished ? 'checked' : ''}>
         const encrypted = encryptData(db); 
         if (!encrypted) return alert("암호화 오류로 내보낼 수 없습니다.");
 
-        const blob = new Blob([encrypted], {type: "text/plain"});
+        const blob = new Blob([encrypted], {type: "application/json"});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `상담백업_암호화_${new Date().toISOString().slice(0,10)}.txt`; 
+        a.download = `상담백업_암호화_${new Date().toISOString().slice(0,10)}.json`; 
         a.click();
     }
 
